@@ -75,10 +75,18 @@ COPY Gemfile Gemfile.lock ./
 RUN apk update && apk add --no-cache build-base musl ruby-full ruby-dev gcc make musl-dev openssl openssl-dev g++ linux-headers xz vips
 RUN bundle config set --local force_ruby_platform true
 
+# Optional build parallelism limits for builders with less memory (e.g. Render's 8 GB).
+# Unset by default, so the build behaves exactly like upstream.
+ARG BUNDLE_JOBS=4
+ARG MAKE_JOBS
+
 # Do not install development or test gems in production
-RUN if [ "$RAILS_ENV" = "production" ]; then \
-  bundle config set without 'development test'; bundle install -j 4 -r 3; \
-  else bundle install -j 4 -r 3; \
+RUN if [ -n "$MAKE_JOBS" ]; then \
+  export MAKE="make -j$MAKE_JOBS" GRPC_RUBY_BUILD_PROCS="$MAKE_JOBS"; \
+  fi; \
+  if [ "$RAILS_ENV" = "production" ]; then \
+  bundle config set without 'development test'; bundle install -j "${BUNDLE_JOBS:-4}" -r 3; \
+  else bundle install -j "${BUNDLE_JOBS:-4}" -r 3; \
   fi
 
 COPY package.json pnpm-lock.yaml ./

@@ -32,6 +32,14 @@ projects:
               # To persist uploads, see "Enabling cloud storage" in §5.
               - key: ACTIVE_STORAGE_SERVICE
                 value: local
+              # --- Docker build limits ---
+              # Render passes env vars to Docker as build args. Compiling grpc
+              # and protobuf from source with full parallelism exceeds the
+              # 8 GB build limit, so cap it (see docker/Dockerfile).
+              - key: BUNDLE_JOBS
+                value: "2"
+              - key: MAKE_JOBS
+                value: "2"
               # --- Outbound email ---
               # Not configured, same as Chatwoot's Heroku button.
               # To send email, add MAILER_SENDER_EMAIL and SMTP_* vars here.

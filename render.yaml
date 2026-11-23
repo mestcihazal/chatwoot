@@ -49,7 +49,7 @@ projects:
             name: chatwoot-web
             runtime: docker
             region: virginia
-            plan: standard
+            plan: pro
             branch: main
             dockerfilePath: ./docker/Dockerfile
             dockerContext: .

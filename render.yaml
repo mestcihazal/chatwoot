@@ -53,11 +53,10 @@ projects:
             branch: main
             dockerfilePath: ./docker/Dockerfile
             dockerContext: .
-            dockerCommand: >-
-              sh -c "bundle exec rails ip_lookup:setup &&
-              bundle exec rails s -p $PORT -b 0.0.0.0"
-            preDeployCommand: >-
-              sh -c "POSTGRES_STATEMENT_TIMEOUT=600s bundle exec rails db:chatwoot_prepare"
+            # Single commands, no shell: Render kept the quotes in `sh -c "..."`
+            # literally. Rails reads PORT from the environment.
+            dockerCommand: bundle exec rails server -b 0.0.0.0
+            preDeployCommand: env POSTGRES_STATEMENT_TIMEOUT=600s bundle exec rails db:chatwoot_prepare
             healthCheckPath: /health
             autoDeployTrigger: checksPass
             numInstances: 1
@@ -85,9 +84,7 @@ projects:
             branch: main
             dockerfilePath: ./docker/Dockerfile
             dockerContext: .
-            dockerCommand: >-
-              sh -c "bundle exec rails ip_lookup:setup &&
-              bundle exec sidekiq -C config/sidekiq.yml"
+            dockerCommand: bundle exec sidekiq -C config/sidekiq.yml
             autoDeployTrigger: checksPass
             maxShutdownDelaySeconds: 60
             envVars:

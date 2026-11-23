@@ -104,8 +104,11 @@ RUN if [ "$RAILS_ENV" = "production" ]; then \
   && rm -rf spec tests node_modules tmp/cache; \
   fi
 
-# Generate .git_sha file with current commit hash
-RUN git rev-parse HEAD > /app/.git_sha
+# Generate .git_sha file with current commit hash.
+# Some builders (e.g. Render) don't include .git in the build context; fall back
+# to the commit they pass as a build arg, then to "unknown".
+ARG RENDER_GIT_COMMIT
+RUN (git rev-parse HEAD 2>/dev/null || echo "${RENDER_GIT_COMMIT:-unknown}") > /app/.git_sha
 
 # Remove unnecessary files
 RUN rm -rf /gems/ruby/3.4.0/cache/*.gem \
